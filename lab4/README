@@ -1,0 +1,5 @@
+run fast_api_server.py first using this command:
+uvicorn fast_api_server:app --host localhost --port 8000 --reload
+
+then run RoverOperator.py using this command:
+python RoverOperator.py

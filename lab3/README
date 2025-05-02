@@ -1,0 +1,43 @@
+How the system works:
+Ground Control Server (gc_server.py)
+ - Provides the map, commands, and mine serial numbers via gRPC
+ - Filters out digging commands ('D') as rovers no longer perform digging
+ - Subscribes to the Defused-Mines channel to log disarmed mines
+
+Rovers (rover_client.py)
+ - Connect to Ground Control via gRPC
+ - Retrieve map and commands from the Ground Control
+ - Execute movement commands 
+ - Does not dig anymore, so does not blow up anymore
+ - Instead, it publishes demine tasks to RabbitMQ when they find mines
+
+Deminers (deminers.py)
+ - Subscribe to the Demine-Queue channel
+ - Process one demine task at a time (if not busy)
+ - Calculate the mine PIN through brute-force hashing
+ - Publish the result to the Defused-Mines channel
+
+For me:
+source .venv/bin/activate
+then cd to lab3
+
+To check RabbitMQ:
+sudo systemctl status rabbitmq-server
+sudo systemctl enable rabbitmq-server
+sudo systemctl start rabbitmq-server
+127.0.0.1:15672 (guest, guest)
+
+How to run:
+Run the ground control server first.
+python3 gc_server.py
+
+Then run the deminers.
+python3 deminer.py 1
+python3 deminer.py 2
+
+Then run the different rovers
+python3 rover_client.py 1
+python3 rover_client.py 2
+python3 rover_client.py 3
+...
+python3 rover_client.py 10

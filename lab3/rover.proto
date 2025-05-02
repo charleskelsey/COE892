@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package rover;
+
+// The service definition. Each method corresponds to one of the five actions.
+service RoverService {
+    // 1. Get the map (the 2D land array)
+    rpc GetMap(Empty) returns (MapResponse);
+
+    // 2. Get a stream of commands (each command is sent as a separate message)
+    rpc GetCommands(RoverRequest) returns (stream Command);
+
+    // 3. Get a mine serial number
+    rpc GetMineSerial(MineSerialRequest) returns (MineSerialResponse);
+
+    // 4. Report execution status (whether all commands were executed successfully)
+    rpc ReportStatus(StatusReport) returns (StatusAck);
+
+    // 5. Share a mine PIN (after disarming a mine) with the server
+    rpc ShareMinePin(MinePin) returns (PinAck);
+}
+
+// An empty message for methods that need no input.
+message Empty {}
+
+// Response for GetMap: includes dimensions and the grid (flattened).
+message MapResponse {
+    int32 rows = 1;
+    int32 cols = 2;
+    repeated int32 grid = 3; // The grid is flattened row‐major.
+}
+
+// Request message that includes the rover id.
+message RoverRequest {
+    int32 rover_id = 1;
+}
+
+// A single command (e.g., "L", "R", "M", or "D")
+message Command {
+    string command = 1;
+}
+
+// Request for a mine serial number (can include rover id if needed).
+message MineSerialRequest {
+    int32 rover_id = 1;
+}
+
+// Response that returns the mine serial number.
+message MineSerialResponse {
+    string serial = 1;
+}
+
+// Message used by the rover to report whether it succeeded.
+message StatusReport {
+    int32 rover_id = 1;
+    bool success = 2;
+}
+
+// A simple acknowledgement for the status report.
+message StatusAck {
+    string message = 1;
+}
+
+// Message to send the computed mine PIN.
+message MinePin {
+    int32 rover_id = 1;
+    int32 pin = 2;
+}
+
+// Acknowledgement for the PIN.
+message PinAck {
+    string message = 1;
+}
